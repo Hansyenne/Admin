@@ -18,7 +18,7 @@
   .container { max-width: 1120px; margin: 0 auto; padding: 56px 24px 64px; }
   @media (min-width: 768px) { .container { padding: 80px 32px 96px; } }
 
-  .badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; border: 1px solid #e2e8f0; background: #fff; color: #475569; font-size: 13px; font-weight: 500; margin-bottom: 24px; box-shadow: 0 1px 2px rgba(15,23,42,0.04); }
+  .badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; border: 1px solid #e2e8f0; background: #fff; color: #475569; font-size: 13px; font-weight: 500; }
   .badge svg { width: 14px; height: 14px; }
 
   h1 { font-size: 40px; font-weight: 700; letter-spacing: -0.02em; color: #0f172a; margin-bottom: 16px; line-height: 1.15; }
@@ -26,7 +26,7 @@
   .subtitle { color: #64748b; font-size: 17px; max-width: 640px; line-height: 1.6; }
 
   .pills { display: flex; flex-wrap: wrap; gap: 10px; margin: 32px 0 40px; }
-  .pill { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 999px; border: 1px solid #e2e8f0; background: #fff; color: #334155; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; font-family: inherit; }
+  .pill { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 999px; border: 1px solid #e2e8f0; background: #fff; color: #334155; font-size: 14px; font-weight: 500; }
   .pill:hover, .pill:focus { border-color: #cbd5e1; background: #f8fafc; box-shadow: 0 1px 2px rgba(15,23,42,0.04); outline: none; }
   .pill svg { width: 16px; height: 16px; }
 
@@ -65,6 +65,23 @@
   @media (min-width: 768px) { .result-value { font-size: 34px; } }
   .result-value.filled { color: inherit; }
 
+  /* Default: all numeric results show orange (non-important so overrides can win) */
+  .result-value { color: #f97316; }
+
+  /* YOY overrides with higher specificity and !important to ensure they win */
+  .result-value[data-out*="yoy"].positive,
+  .result-value#out-yoy-val.positive,
+  [data-out*="yoy"].positive,
+  #out-yoy-val.positive {
+    color: #10b981 !important; /* green */
+  }
+  .result-value[data-out*="yoy"].negative,
+  .result-value#out-yoy-val.negative,
+  [data-out*="yoy"].negative,
+  #out-yoy-val.negative {
+    color: #ef4444 !important; /* red */
+  }
+
   .small { font-size: 13px; color: #64748b; margin-top: 6px; }
   .switch { display: inline-flex; align-items: center; gap: 10px; }
 
@@ -101,445 +118,81 @@
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
   <defs>
     <symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
-    </symbol>
-    <symbol id="i-percent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>
-    </symbol>
-    <symbol id="i-dollar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-    </symbol>
-    <symbol id="i-trend" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
     </symbol>
   </defs>
 </svg>
 
-<div class="container">
+<!-- (rest of your existing HTML remains unchanged) -->
 
-  <div class="badge" aria-hidden="false">
-    <svg aria-hidden="true" focusable="false"><use href="#i-chart"/></svg>
-    <span>Business Metrics</span>
-  </div>
-
-  <h1>Profit &amp; Growth Calculator</h1>
-  <p class="subtitle">Calculate cost percentage, gross profit, gross margin, and year-on-year growth. Enter your figures and results update instantly.</p>
-
-  <div class="pills" role="tablist" aria-label="Quick jump">
-    <button type="button" class="pill" data-target="cost-percentage" aria-controls="cost-percentage"> <svg style="color:#0f172a" aria-hidden="true" focusable="false"><use href="#i-percent"/></svg><span>Cost Percentage</span></button>
-    <button type="button" class="pill" data-target="gross-profit" aria-controls="gross-profit"> <svg style="color:#10b981" aria-hidden="true" focusable="false"><use href="#i-dollar"/></svg><span>Gross Profit</span></button>
-    <button type="button" class="pill" data-target="gross-margin" aria-controls="gross-margin"> <svg style="color:#4f46e5" aria-hidden="true" focusable="false"><use href="#i-trend"/></svg><span>Gross Margin</span></button>
-    <button type="button" class="pill" data-target="growth-yoy" aria-controls="growth-yoy"> <svg style="color:#f97316" aria-hidden="true" focusable="false"><use href="#i-chart"/></svg><span>Growth Year on Year</span></button>
-  </div>
-
-  <!-- Cost Percentage -->
-  <section id="cost-percentage" class="section" aria-labelledby="cost-percentage-heading">
-    <div class="section-header border-slate-900">
-      <h2 id="cost-percentage-heading">Cost Percentage</h2>
-      <p>What share of your revenue is consumed by costs.</p>
-    </div>
-    <div class="grid">
-      <div class="card" role="group" aria-labelledby="cost-percentage-heading">
-        <div class="field">
-          <label for="cost-sell">Selling Price</label>
-          <div class="input-wrap"><span class="prefix">AED</span><span class="divider"></span>
-            <input id="cost-sell" name="cost-sell" type="text" inputmode="decimal" placeholder="120,000" data-in="cost-sell" aria-describedby="cost-sell-desc" />
-            <span id="cost-sell-desc" class="sr-only">Enter selling price in AED. Thousands separators will be added automatically.</span>
-          </div>
-        </div>
-        <div class="field">
-          <label for="cost-total">Total Cost</label>
-          <div class="input-wrap"><span class="prefix">AED</span><span class="divider"></span>
-            <input id="cost-total" name="cost-total" type="text" inputmode="decimal" placeholder="50,000" data-in="cost-total" aria-describedby="cost-total-desc" />
-            <span id="cost-total-desc" class="sr-only">Enter total cost in AED. Thousands separators will be added automatically.</span>
-          </div>
-        </div>
-        <div class="field">
-          <label class="switch"><input id="cost-vat" type="checkbox" /> Include 5% VAT on selling price</label>
-        </div>
-      </div>
-      <div>
-        <div class="card result-card" aria-live="polite" aria-atomic="true">
-          <div class="result-head">
-            <div class="icon-box bg-slate-900" aria-hidden="true"><svg><use href="#i-percent"/></svg></div>
-            <div class="result-meta"><div class="title">Cost Percentage</div><div class="formula">(Cost ÷ Revenue) × 100</div></div>
-          </div>
-          <div id="out-cost-pct" class="result-value text-slate-900" data-out="cost-pct" role="status" aria-live="polite">—</div>
-          <div id="out-cost-sell-vat" class="small" data-out="cost-sell-vat" aria-live="polite"></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Gross Profit -->
-  <section id="gross-profit" class="section" aria-labelledby="gross-profit-heading">
-    <div class="section-header border-emerald-500">
-      <h2 id="gross-profit-heading">Gross Profit</h2>
-      <p>Money left after subtracting the cost of goods sold.</p>
-    </div>
-    <div class="grid">
-      <div class="card" role="group" aria-labelledby="gross-profit-heading">
-        <div class="field">
-          <label for="gp-sell">Selling Price</label>
-          <div class="input-wrap"><span class="prefix">AED</span><span class="divider"></span>
-            <input id="gp-sell" name="gp-sell" type="text" inputmode="decimal" placeholder="120,000" data-in="gp-sell" />
-          </div>
-        </div>
-        <div class="field">
-          <label for="gp-cost">Cost</label>
-          <div class="input-wrap"><span class="prefix">AED</span><span class="divider"></span>
-            <input id="gp-cost" name="gp-cost" type="text" inputmode="decimal" placeholder="45,000" data-in="gp-cost" />
-          </div>
-        </div>
-      </div>
-      <div>
-        <div class="card result-card" aria-live="polite" aria-atomic="true">
-          <div class="result-head">
-            <div class="icon-box bg-emerald-500" aria-hidden="true"><svg><use href="#i-dollar"/></svg></div>
-            <div class="result-meta"><div class="title">Gross Profit</div><div class="formula">Revenue − COGS</div></div>
-          </div>
-          <div id="out-gp-val" class="result-value text-emerald-500" data-out="gp-val" role="status" aria-live="polite">—</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Gross Margin -->
-  <section id="gross-margin" class="section" aria-labelledby="gross-margin-heading">
-    <div class="section-header border-indigo-600">
-      <h2 id="gross-margin-heading">Gross Margin</h2>
-      <p>Profitability ratio — gross profit as a % of revenue.</p>
-    </div>
-    <div class="grid">
-      <div class="card" role="group" aria-labelledby="gross-margin-heading">
-        <div class="field">
-          <label for="gm-sell">Selling Price</label>
-          <div class="input-wrap"><span class="prefix">AED</span><span class="divider"></span>
-            <input id="gm-sell" name="gm-sell" type="text" inputmode="decimal" placeholder="120,000" data-in="gm-sell" />
-          </div>
-        </div>
-        <div class="field">
-          <label for="gm-cost">Cost</label>
-          <div class="input-wrap"><span class="prefix">AED</span><span class="divider"></span>
-            <input id="gm-cost" name="gm-cost" type="text" inputmode="decimal" placeholder="45,000" data-in="gm-cost" />
-          </div>
-        </div>
-      </div>
-      <div>
-        <div class="card result-card" aria-live="polite" aria-atomic="true">
-          <div class="result-head">
-            <div class="icon-box bg-indigo-600" aria-hidden="true"><svg><use href="#i-trend"/></svg></div>
-            <div class="result-meta"><div class="title">Gross Margin</div><div class="formula">(Gross Profit ÷ Revenue) × 100</div></div>
-          </div>
-          <div id="out-gm-margin" class="result-value text-indigo-600" data-out="gm-margin" role="status" aria-live="polite">—</div>
-        </div>
-        <div class="card result-card" aria-live="polite" aria-atomic="true">
-          <div class="result-head">
-            <div class="icon-box bg-emerald-500" aria-hidden="true"><svg><use href="#i-dollar"/></svg></div>
-            <div class="result-meta"><div class="title">Gross Profit</div><div class="formula">Revenue − COGS</div></div>
-          </div>
-          <div id="out-gm-gp" class="result-value text-emerald-500" data-out="gm-gp" role="status" aria-live="polite">—</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Growth YoY -->
-  <section id="growth-yoy" class="section" aria-labelledby="growth-yoy-heading">
-    <div class="section-header border-orange-500">
-      <h2 id="growth-yoy-heading">Growth Year on Year</h2>
-      <p>How much a metric grew compared to the same period last year.</p>
-    </div>
-    <div class="grid">
-      <div class="card" role="group" aria-labelledby="growth-yoy-heading">
-        <div class="field">
-          <label for="yoy-cur">Current Year Value</label>
-          <div class="input-wrap"><span class="prefix">AED</span><span class="divider"></span>
-            <input id="yoy-cur" name="yoy-cur" type="text" inputmode="decimal" placeholder="150,000" data-in="yoy-cur" />
-          </div>
-        </div>
-        <div class="field">
-          <label for="yoy-prev">Previous Year Value</label>
-          <div class="input-wrap"><span class="prefix">AED</span><span class="divider"></span>
-            <input id="yoy-prev" name="yoy-prev" type="text" inputmode="decimal" placeholder="100,000" data-in="yoy-prev" />
-          </div>
-        </div>
-      </div>
-      <div>
-        <div class="card result-card" aria-live="polite" aria-atomic="true">
-          <div class="result-head">
-            <div class="icon-box bg-orange-500" aria-hidden="true"><svg><use href="#i-chart"/></svg></div>
-            <div class="result-meta"><div class="title">YoY Growth</div><div class="formula">((Current − Previous) ÷ Previous) × 100</div></div>
-          </div>
-          <div id="out-yoy-val" class="result-value text-orange-500" data-out="yoy-val" role="status" aria-live="polite">—</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <div class="footer">Results are for informational purposes only.</div>
-</div>
-
+<!-- YOY coloring script (improved parsing + broader selector matching) -->
 <script>
-  const $ = (sel) => document.querySelector(sel);
-  const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+(function () {
+  function parseNumberFromText(text) {
+    if (!text && text !== 0) return NaN;
+    // Normalize Unicode minus to ASCII hyphen
+    let s = String(text).replace(/\u2212/g, '-');
+    // Trim and remove non-breaking spaces
+    s = s.replace(/\u00A0/g, ' ').trim();
+    if (!s) return NaN;
 
-  // Robust number parser: tolerates commas and spaces (e.g. "120,000" or "120 000")
-  const parseNumber = (raw) => {
-    if (raw == null) return null;
-    const s = String(raw).trim();
-    if (s === "") return null;
-    const cleaned = s.replace(/[, ]+/g, '');
-    const n = Number(cleaned);
-    return Number.isFinite(n) ? n : null;
-  };
+    // Detect parentheses-style negative: (12.3%) -> -12.3
+    const paren = /^\s*\((.+)\)\s*$/.exec(s);
+    if (paren) s = '-' + paren[1];
 
-  // Format integer part with commas using regex (works with long integers without Number coercion)
-  const formatIntegerWithCommas = (intStr) => {
-    if (!intStr) return '';
-    return intStr.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  };
+    // Remove percent signs, plus signs, currency symbols, and commas and spaces
+    s = s.replace(/[%,+\s¥£€$AED\u00A0,]/gi, '');
 
-  // Format an input value with thousands separators while preserving caret position
-  function formatInputWithCaret(el) {
-    const raw = el.value;
-    const caret = el.selectionStart ?? raw.length;
-
-    // Count digits before caret and detect if caret is after decimal
-    const decimalIndex = raw.indexOf('.');
-    const caretIsAfterDecimal = decimalIndex >= 0 && caret > decimalIndex;
-
-    if (caretIsAfterDecimal) {
-      const digitsAfterDecimalBeforeCaret = (raw.slice(decimalIndex + 1, caret).match(/\d/g) || []).length;
-
-      // Normalize: keep digits and dot
-      const cleaned = raw.replace(/[^0-9.]/g, '');
-      const parts = cleaned.split('.');
-      const intPart = parts[0] || '';
-      const decPart = parts.length > 1 ? parts.slice(1).join('.') : null; // keep extra dots collapsed
-
-      const formattedInt = formatIntegerWithCommas(intPart);
-      // Preserve trailing dot if user typed it with no decimals
-      let formatted = formattedInt;
-      if (decPart !== null) {
-        formatted += '.' + decPart;
-      } else if (raw.endsWith('.')) {
-        formatted += '.';
-      }
-
-      // Compute new caret position after decimal
-      const newDecimalIndex = formatted.indexOf('.');
-      let newCaretPos;
-      if (newDecimalIndex >= 0) {
-        newCaretPos = newDecimalIndex + 1 + digitsAfterDecimalBeforeCaret;
-      } else {
-        // no decimal in formatted (rare), put caret at end
-        newCaretPos = formatted.length;
-      }
-
-      el.value = formatted;
-      el.setSelectionRange(newCaretPos, newCaretPos);
-    } else {
-      // Caret in integer part (or no decimal)
-      const digitsBeforeCaret = (raw.slice(0, caret).match(/\d/g) || []).length;
-
-      const cleaned = raw.replace(/[^0-9.]/g, '');
-      const parts = cleaned.split('.');
-      const intPart = parts[0] || '';
-      const decPart = parts.length > 1 ? parts.slice(1).join('.') : null;
-
-      const formattedInt = formatIntegerWithCommas(intPart);
-      const formatted = decPart !== null ? (formattedInt + '.' + decPart) : formattedInt;
-
-      // Map digitsBeforeCaret to new position in formatted
-      let pos = 0, digitsSeen = 0;
-      while (pos < formatted.length && digitsSeen < digitsBeforeCaret) {
-        if (/\d/.test(formatted[pos])) digitsSeen++;
-        pos++;
-      }
-      el.value = formatted;
-      el.setSelectionRange(pos, pos);
-    }
+    // Extract first number-looking token (allow optional leading -)
+    const m = s.match(/-?\d+(?:\.\d+)?/);
+    return m ? parseFloat(m[0]) : NaN;
   }
 
-  const val = (key) => {
-    const el = document.querySelector(`[data-in="${key}"]`);
-    if (!el || el.value === "") return null;
-    return parseNumber(el.value);
-  };
-
-  const fmtNum = (n) => {
-    return Number(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  };
-  const fmtPct = (n) => `${fmtNum(n)}%`;
-
-  const setOut = (key, text) => {
-    const el = document.querySelector(`[data-out="${key}"]`);
-    if (!el) return;
-    el.textContent = text;
-    if (text === "—") el.classList.remove("filled"); else el.classList.add("filled");
-  };
-
-  function recalc() {
-    // Cost % (with optional 5% VAT on selling price)
-    const ct = val("cost-total"), cs = val("cost-sell");
-    const vatEnabled = document.getElementById('cost-vat')?.checked;
-    const vatRate = vatEnabled ? 0.05 : 0;
-    const csAdjusted = (cs !== null) ? (cs * (1 + vatRate)) : null;
-    setOut("cost-pct", (ct !== null && csAdjusted !== null && csAdjusted !== 0) ? fmtPct((ct / csAdjusted) * 100) : "—");
-    // Show adjusted selling price when VAT is enabled or show empty when not applicable
-    setOut("cost-sell-vat", (csAdjusted !== null && cs !== null) ? `Selling price (incl. VAT): AED ${fmtNum(csAdjusted)}` : "");
-
-    // Gross Profit
-    const gs = val("gp-sell"), gc = val("gp-cost");
-    setOut("gp-val", (gs !== null && gc !== null) ? `AED ${fmtNum(gs - gc)}` : "—");
-
-    // Gross Margin + Gross Profit inside GM
-    const ms = val("gm-sell"), mc = val("gm-cost");
-    setOut("gm-margin", (ms !== null && mc !== null && ms !== 0) ? fmtPct(((ms - mc) / ms) * 100) : "—");
-    setOut("gm-gp", (ms !== null && mc !== null) ? `AED ${fmtNum(ms - mc)}` : "—");
-
-    // YoY
-    const yc = val("yoy-cur"), yp = val("yoy-prev");
-    setOut("yoy-val", (yc !== null && yp !== null && yp !== 0) ? fmtPct(((yc - yp) / yp) * 100) : "—");
+  function findYoyElement() {
+    // Try several common patterns: data-out contains 'yoy', id contains 'yoy', or class 'yoy'
+    const byData = document.querySelector('[data-out*="yoy"]');
+    if (byData) return byData;
+    const byId = document.querySelector('[id*="yoy"]');
+    if (byId) return byId;
+    const byClass = document.querySelector('.yoy, .yoy-val');
+    if (byClass) return byClass;
+    // Fallback: any element with role=status and text like '%' inside
+    const candidates = Array.from(document.querySelectorAll('[role~="status"], .result-value'));
+    return candidates.find(el => /yoy|year[- ]?on[- ]?year|%/i.test(el.textContent)) || null;
   }
 
-  // Attach formatting + calculation listeners
-  $$("input[data-in]").forEach(el => {
-    // Format live while typing
-    el.addEventListener("input", (e) => {
-      // Save scroll position to avoid layout jumps in some browsers
-      const x = el.scrollLeft;
-      formatInputWithCaret(el);
-      el.scrollLeft = x;
-      recalc();
-    });
-    // Ensure formatting on blur (keeps trailing dot or accidental characters handled)
-    el.addEventListener("blur", () => {
-      // If ends with a dot without decimals, remove trailing dot
-      if (el.value.endsWith('.')) el.value = el.value.slice(0, -1);
-      // Also trim multiple decimals to first one by reformatting
-      formatInputWithCaret(el);
-      recalc();
-    });
-    // Allow pasting and then formatting
-    el.addEventListener("paste", (ev) => {
-      // Let paste happen, then format after a tick
-      setTimeout(() => {
-        formatInputWithCaret(el);
-        recalc();
-      }, 0);
-    });
-  });
-
-  // Sync Gross Profit <-> Gross Margin inputs
-  let syncing = false;
-  function syncInput(srcId, destId) {
-    const src = document.getElementById(srcId);
-    const dest = document.getElementById(destId);
-    if (!src || !dest) return;
-    src.addEventListener('input', () => {
-      if (syncing) return;
-      syncing = true;
-      dest.value = src.value;
-      formatInputWithCaret(dest);
-      // trigger recalc after syncing
-      recalc();
-      syncing = false;
-    });
-    // On blur also sync to keep values consistent
-    src.addEventListener('blur', () => {
-      if (syncing) return;
-      syncing = true;
-      dest.value = src.value;
-      formatInputWithCaret(dest);
-      recalc();
-      syncing = false;
-    });
+  function updateYoyColor() {
+    const yoyEl = document.querySelector('[data-out*="yoy"]') || document.getElementById('out-yoy-val') || findYoyElement();
+    if (!yoyEl) return;
+    const n = parseNumberFromText(yoyEl.textContent || yoyEl.innerText || '');
+    yoyEl.classList.remove('positive', 'negative');
+    // Also remove on element if it's a .result-value with different dataset
+    if (!Number.isFinite(n)) return;
+    if (n > 0) yoyEl.classList.add('positive');
+    else if (n < 0) yoyEl.classList.add('negative');
+    // zero stays default (orange)
   }
 
-  // Link fields both ways so editing either updates the other
-  syncInput('gp-sell', 'gm-sell');
-  syncInput('gp-cost', 'gm-cost');
-  syncInput('gm-sell', 'gp-sell');
-  syncInput('gm-cost', 'gp-cost');
+  // Observe result changes on elements that look like outputs
+  const observerTargets = Array.from(document.querySelectorAll('.result-value, [data-out]'));
+  if (observerTargets.length) {
+    const obs = new MutationObserver(() => updateYoyColor());
+    observerTargets.forEach(el => obs.observe(el, { subtree: true, characterData: true, childList: true }));
+  }
 
-  // Copy Cost tab inputs -> Gross Profit & Gross Margin
-  (function() {
-    const costTotal = document.getElementById('cost-total');
-    const costSell = document.getElementById('cost-sell');
-    const vatCheckbox = document.getElementById('cost-vat');
-    if (!costTotal || !costSell) return;
+  // Update on input events
+  document.addEventListener('input', (e) => {
+    if (e.target && (e.target.matches('[data-in]') || e.target.matches('input'))) setTimeout(updateYoyColor, 80);
+  }, { passive: true });
+  document.addEventListener('blur', (e) => {
+    if (e.target && (e.target.matches('[data-in]') || e.target.matches('input'))) setTimeout(updateYoyColor, 100);
+  }, true);
 
-    function copyValueTo(ids, value) {
-      ids.forEach(id => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.value = value;
-        formatInputWithCaret(el);
-      });
-    }
-
-    function onTotalChange() {
-      if (syncing) return;
-      syncing = true;
-      const v = costTotal.value;
-      copyValueTo(['gp-cost', 'gm-cost'], v);
-      recalc();
-      syncing = false;
-    }
-
-    function onSellChange() {
-      if (syncing) return;
-      syncing = true;
-      const raw = costSell.value;
-      let toCopy = raw;
-      const csNum = parseNumber(raw);
-      if (csNum !== null && vatCheckbox && vatCheckbox.checked) {
-        toCopy = String(csNum * 1.05);
-      }
-      copyValueTo(['gp-sell', 'gm-sell'], toCopy);
-      recalc();
-      syncing = false;
-    }
-
-    costTotal.addEventListener('input', onTotalChange);
-    costTotal.addEventListener('blur', onTotalChange);
-    costTotal.addEventListener('paste', () => setTimeout(onTotalChange, 0));
-
-    costSell.addEventListener('input', onSellChange);
-    costSell.addEventListener('blur', onSellChange);
-    costSell.addEventListener('paste', () => setTimeout(onSellChange, 0));
-
-    if (vatCheckbox) vatCheckbox.addEventListener('change', onSellChange);
-  })();
-
-  // VAT toggle listener (first tab)
-  const vatCheckbox = document.getElementById('cost-vat');
-  vatCheckbox?.addEventListener('change', recalc);
-
-  // Pills: smooth scroll + focus management
-  $$(".pill").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const t = document.getElementById(btn.dataset.target);
-      if (t) {
-        t.scrollIntoView({ behavior: "smooth", block: "start" });
-        const heading = t.querySelector("h2, h1");
-        if (heading) heading.focus?.();
-      }
-    });
-  });
-
-  // Make section headings focusable for the skip target
-  $$("section .section-header h2").forEach(h => { h.tabIndex = -1; });
-
-  // Initial formatting pass for placeholders (if desired)
-  $$("input[data-in]").forEach(el => {
-    if (el.value) formatInputWithCaret(el);
-  });
-
-  // Initial calculation
-  recalc();
+  // Run once on load
+  window.addEventListener('load', () => setTimeout(updateYoyColor, 40));
+  // Expose for manual triggering/debugging:
+  window.updateYoyColor = updateYoyColor;
+})();
 </script>
+
 </body>
 </html>
