@@ -432,6 +432,38 @@
     });
   });
 
+  // Sync Gross Profit <-> Gross Margin inputs
+  let syncing = false;
+  function syncInput(srcId, destId) {
+    const src = document.getElementById(srcId);
+    const dest = document.getElementById(destId);
+    if (!src || !dest) return;
+    src.addEventListener('input', () => {
+      if (syncing) return;
+      syncing = true;
+      dest.value = src.value;
+      formatInputWithCaret(dest);
+      // trigger recalc after syncing
+      recalc();
+      syncing = false;
+    });
+    // On blur also sync to keep values consistent
+    src.addEventListener('blur', () => {
+      if (syncing) return;
+      syncing = true;
+      dest.value = src.value;
+      formatInputWithCaret(dest);
+      recalc();
+      syncing = false;
+    });
+  }
+
+  // Link fields both ways so editing either updates the other
+  syncInput('gp-sell', 'gm-sell');
+  syncInput('gp-cost', 'gm-cost');
+  syncInput('gm-sell', 'gp-sell');
+  syncInput('gm-cost', 'gp-cost');
+
   // VAT toggle listener (first tab)
   const vatCheckbox = document.getElementById('cost-vat');
   vatCheckbox?.addEventListener('change', recalc);
