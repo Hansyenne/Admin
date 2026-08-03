@@ -115,82 +115,71 @@
 <body>
 
 <!-- SVG icon defs -->
-<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-  <defs>
-    <symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    </symbol>
-  </defs>
-</svg>
 
-<!-- (rest of your existing HTML remains unchanged) -->
+<header class="container" style="padding-top:32px;padding-bottom:0">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;">
+    <div>
+      <span class="badge">Demo</span>
+      <h1>Profit & Growth Calculator</h1>
+      <p class="subtitle">A simple, static calculator demo for Profit and Growth with YoY highlighting.</p>
+    </div>
+  </div>
+</header>
 
-<!-- YOY coloring script (improved parsing + broader selector matching) -->
+<main class="container">
+  <section class="grid">
+    <div class="card">
+      <div class="field">
+        <label>Revenue</label>
+        <div class="input-wrap"><div class="prefix">$</div><input type="number" data-in="revenue" value="100000" /></div>
+      </div>
+      <div class="field">
+        <label>Cost</label>
+        <div class="input-wrap"><div class="prefix">$</div><input type="number" data-in="cost" value="85000" /></div>
+      </div>
+    </div>
+
+    <div class="card result-card">
+      <div class="result-head">
+        <div class="icon-box bg-indigo-600"></div>
+        <div class="result-meta">
+          <div class="title">YoY Growth</div>
+          <div class="formula">(this - last) / last</div>
+        </div>
+      </div>
+      <div id="out-yoy-val" class="result-value" data-out="yoy-val">+15.3%</div>
+    </div>
+  </section>
+
+  <div class="footer">Built with ❤️</div>
+</main>
+
+<!-- TEMP: disabled external scripts to diagnose white-page issue -->
+<!-- Original scripts commented out. If this fixes the site, I'll re-enable them one-by-one to find the culprit. -->
+<!-- <script src="app.js" defer></script>
+<script src="yoy-coloring.js" defer></script>
+-->
+
+<!-- Keep a tiny inline script to wire the demo inputs (safe) -->
 <script>
-(function () {
-  function parseNumberFromText(text) {
-    if (!text && text !== 0) return NaN;
-    // Normalize Unicode minus to ASCII hyphen
-    let s = String(text).replace(/\u2212/g, '-');
-    // Trim and remove non-breaking spaces
-    s = s.replace(/\u00A0/g, ' ').trim();
-    if (!s) return NaN;
-
-    // Detect parentheses-style negative: (12.3%) -> -12.3
-    const paren = /^\s*\((.+)\)\s*$/.exec(s);
-    if (paren) s = '-' + paren[1];
-
-    // Remove percent signs, plus signs, currency symbols, and commas and spaces
-    s = s.replace(/[%,+\s¥£€$AED\u00A0,]/gi, '');
-
-    // Extract first number-looking token (allow optional leading -)
-    const m = s.match(/-?\d+(?:\.\d+)?/);
-    return m ? parseFloat(m[0]) : NaN;
-  }
-
-  function findYoyElement() {
-    // Try several common patterns: data-out contains 'yoy', id contains 'yoy', or class 'yoy'
-    const byData = document.querySelector('[data-out*="yoy"]');
-    if (byData) return byData;
-    const byId = document.querySelector('[id*="yoy"]');
-    if (byId) return byId;
-    const byClass = document.querySelector('.yoy, .yoy-val');
-    if (byClass) return byClass;
-    // Fallback: any element with role=status and text like '%' inside
-    const candidates = Array.from(document.querySelectorAll('[role~="status"], .result-value'));
-    return candidates.find(el => /yoy|year[- ]?on[- ]?year|%/i.test(el.textContent)) || null;
-  }
-
-  function updateYoyColor() {
-    const yoyEl = document.querySelector('[data-out*="yoy"]') || document.getElementById('out-yoy-val') || findYoyElement();
-    if (!yoyEl) return;
-    const n = parseNumberFromText(yoyEl.textContent || yoyEl.innerText || '');
-    yoyEl.classList.remove('positive', 'negative');
-    // Also remove on element if it's a .result-value with different dataset
-    if (!Number.isFinite(n)) return;
+(function(){
+  function update() {
+    const r = parseFloat(document.querySelector('[data-in="revenue"]').value) || 0;
+    const c = parseFloat(document.querySelector('[data-in="cost"]').value) || 0;
+    const profit = r - c;
+    const yoyEl = document.getElementById('out-yoy-val');
+    // fake yoy: profit / r * 100 - just demo
+    const yoy = r ? ((profit / r) * 100).toFixed(1) : 0;
+    const sign = (String(yoy)[0] === '-') ? '' : '+';
+    yoyEl.textContent = sign + yoy + '%';
+    // color update mimic (no external script)
+    yoyEl.classList.remove('positive','negative');
+    const n = parseFloat(yoy);
     if (n > 0) yoyEl.classList.add('positive');
     else if (n < 0) yoyEl.classList.add('negative');
-    // zero stays default (orange)
   }
-
-  // Observe result changes on elements that look like outputs
-  const observerTargets = Array.from(document.querySelectorAll('.result-value, [data-out]'));
-  if (observerTargets.length) {
-    const obs = new MutationObserver(() => updateYoyColor());
-    observerTargets.forEach(el => obs.observe(el, { subtree: true, characterData: true, childList: true }));
-  }
-
-  // Update on input events
-  document.addEventListener('input', (e) => {
-    if (e.target && (e.target.matches('[data-in]') || e.target.matches('input'))) setTimeout(updateYoyColor, 80);
-  }, { passive: true });
-  document.addEventListener('blur', (e) => {
-    if (e.target && (e.target.matches('[data-in]') || e.target.matches('input'))) setTimeout(updateYoyColor, 100);
-  }, true);
-
-  // Run once on load
-  window.addEventListener('load', () => setTimeout(updateYoyColor, 40));
-  // Expose for manual triggering/debugging:
-  window.updateYoyColor = updateYoyColor;
+  document.querySelectorAll('[data-in]').forEach(i=> i.addEventListener('input', update));
+  window.addEventListener('load', update);
 })();
 </script>
 
