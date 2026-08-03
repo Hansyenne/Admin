@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Profit & Growth Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #ffffff; color: #0f172a; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-decoration: none; }
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  input[type="number"] { -moz-appearance: textfield; }
+
+  .container { max-width: 1120px; margin: 0 auto; padding: 56px 24px 64px; }
+  @media (min-width: 768px) { .container { padding: 80px 32px 96px; } }
+
+  .badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; border: 1px solid #e2e8f0; background: #fff; color: #475569; font-size: 13px; font-weight: 500; margin-bottom: 24px; box-shadow: 0 1px 2px rgba(15,23,42,0.04); }
+  .badge svg { width: 14px; height: 14px; }
+
+  h1 { font-size: 40px; font-weight: 700; letter-spacing: -0.02em; color: #0f172a; margin-bottom: 16px; line-height: 1.15; }
+  @media (min-width: 768px) { h1 { font-size: 48px; } }
+  .subtitle { color: #64748b; font-size: 17px; max-width: 640px; line-height: 1.6; }
+
+  .pills { display: flex; flex-wrap: wrap; gap: 10px; margin: 32px 0 40px; }
+  .pill { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 999px; border: 1px solid #e2e8f0; background: #fff; color: #334155; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; font-family: inherit; }
+  .pill:hover, .pill:focus { border-color: #cbd5e1; background: #f8fafc; box-shadow: 0 1px 2px rgba(15,23,42,0.04); outline: none; }
+  .pill svg { width: 16px; height: 16px; }
+
+  .section { margin-bottom: 44px; scroll-margin-top: 24px; }
+  .section-header { padding-left: 16px; border-left: 3px solid; margin-bottom: 20px; }
+  .section-header h2 { font-size: 24px; font-weight: 600; color: #0f172a; letter-spacing: -0.01em; }
+  @media (min-width: 768px) { .section-header h2 { font-size: 26px; } }
+  .section-header p { color: #64748b; font-size: 15px; margin-top: 4px; }
+
+  .grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+  @media (min-width: 1024px) { .grid { grid-template-columns: 1fr 1fr; } }
+
+  .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; box-shadow: 0 1px 2px rgba(15,23,42,0.04); transition: box-shadow 0.2s ease; }
+  @media (min-width: 768px) { .card { padding: 28px; } }
+  .card:hover { box-shadow: 0 4px 16px rgba(15,23,42,0.06); }
+
+  .field { margin-bottom: 20px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label { display: block; font-size: 13px; font-weight: 500; color: #334155; margin-bottom: 8px; }
+  .input-wrap { display: flex; align-items: center; border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; overflow: hidden; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+  .input-wrap:focus-within { border-color: #94a3b8; box-shadow: 0 0 0 2px #f1f5f9; }
+  .input-wrap .prefix { padding: 0 8px 0 14px; font-size: 13px; font-weight: 500; color: #94a3b8; user-select: none; }
+  .input-wrap .divider { width: 1px; height: 20px; background: #e2e8f0; }
+  .input-wrap input { flex: 1; border: 0; outline: 0; padding: 12px 14px; background: transparent; font-size: 15px; color: #0f172a; font-family: inherit; }
+  .input-wrap input::placeholder { color: #cbd5e1; }
+
+  .result-card { min-height: 152px; display: flex; flex-direction: column; margin-bottom: 20px; }
+  .result-card:last-child { margin-bottom: 0; }
+  .result-head { display: flex; align-items: flex-start; gap: 14px; }
+  .icon-box { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 1px 2px rgba(15,23,42,0.08); }
+  .icon-box svg { width: 20px; height: 20px; color: #fff; stroke-width: 2.25; }
+  .result-meta .title { font-size: 15px; font-weight: 600; color: #0f172a; line-height: 1.2; }
+  .result-meta .formula { font-size: 12.5px; color: #64748b; margin-top: 2px; }
+
+  .result-value { margin-top: 20px; flex: 1; display: flex; align-items: flex-end; font-size: 30px; font-weight: 700; letter-spacing: -0.02em; color: #cbd5e1; transition: color 0.25s ease; }
+  @media (min-width: 768px) { .result-value { font-size: 34px; } }
+  .result-value.filled { color: inherit; }
+
+  .footer { margin-top: 48px; padding-top: 32px; border-top: 1px solid #e2e8f0; text-align: center; color: #94a3b8; font-size: 14px; }
+
+  /* Accent colors */
+  .bg-slate-900 { background: #0f172a; }
+  .bg-emerald-500 { background: #10b981; }
+  .bg-indigo-600 { background: #4f46e5; }
+  .bg-orange-500 { background: #f97316; }
+  .border-slate-900 { border-color: #0f172a; }
+  .border-emerald-500 { border-color: #10b981; }
+  .border-indigo-600 { border-color: #4f46e5; }
+  .border-orange-500 { border-color: #f97316; }
+  .text-slate-900 { color: #0f172a; }
+  .text-emerald-500 { color: #10b981; }
+  .text-indigo-600 { color: #4f46e5; }
+  .text-orange-500 { color: #f97316; }
+
+  /* Screen-reader only */
+  .sr-only {
+    position: absolute !important;
+    height: 1px; width: 1px;
+    overflow: hidden;
+    clip: rect(1px, 1px, 1px, 1px);
+    white-space: nowrap;
+    border: 0; padding: 0; margin: -1px;
+  }
+</style>
+</head>
+<body>
+
+<!-- SVG icon defs -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+    </symbol>
+    <symbol id="i-percent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>
+    </symbol>
+    <symbol id="i-dollar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+    </symbol>
+    <symbol id="i-trend" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="container">
+
+  <div class="badge" aria-hidden="false">
+    <svg aria-hidden="true" focusable="false"><use href="#i-chart"/></svg>
+    <span>Business Metrics</span>
+  </div>
+
+  <h1>Profit &amp; Growth Calculator</h1>
+  <p class="subtitle">Calculate cost percentage, gross profit, gross margin, and year-on-year growth. Enter your figures and results update instantly.</p>
+
+  <div class="pills" role="tablist" aria-label="Quick jump">
+    <button type="button" class="pill" data-target="cost-percentage" aria-controls="cost-percentage"> <svg style="color:#0f172a" aria-hidden="true" focusable="false"><use href="#i-percent"/></svg><span>Cost Percentage</span></button>
+    <button type="button" class="pill" data-target="gross-profit" aria-controls="gross-profit"> <svg style="color:#10b981" aria-hidden="true" focusable="false"><use href="#i-dollar"/></svg><span>Gross Profit</span></button>
+    <button type="button" class="pill" data-target="gross-margin" aria-controls="gross-margin"> <svg style="color:#4f46e5" aria-hidden="true" focusable="false"><use href="#i-trend"/></svg><span>Gross Margin</span></button>
+    <button type="button" class="pill" data-target="growth-yoy" aria-controls="growth-yoy"> <svg style="color:#f97316" aria-hidden="true" focusable="false"><use href="#i-chart"/></svg><span>Growth Year on Year</span></button>
+  </div>
+
+  <!-- Cost Percentage -->
+  <section id="cost-percentage" class="section" aria-labelledby="cost-percentage-heading">
+    <div class="section-header border-slate-900">
+      <h2 id="cost-percentage-heading">Cost Percentage</h2>
+      <p>What share of your revenue is consumed by costs.</p>
+    </div>
+    <div class="grid">
+      <div class="card" role="group" aria-labelledby="cost-percentage-heading">
+        <div class="field">
+          <label for="cost-total">Total Cost</label>
+          <div class="input-wrap"><span class="prefix">AED</span><span class="divider"></span>
+            <input id="cost-total" name="cost-total" type="text" inputmode="decimal" placeholder="50,000" data-in="cost-total" aria-describedby="cost-total-desc" />
+            <span id="cost-total-desc" class="sr-only">Enter total cost in AED. Thousands separators will be added automatically.</span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="cost-sell">Selling Price</label>
+          <div class="input-wrap"><span class="prefix">AED</span><span class="divider"></span>
+            <input id="cost-sell" name="cost-sell" type="text" inputmode="decimal" placeholder="120,000" data-in="cost-sell" aria-describedby="cost-sell-desc" />
+            <span id="cost-sell-desc" class="sr-only">Enter selling price in AED. Thousands separators will be added automatically.</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card result-card" aria-live="polite" aria-atomic="true">
+          <div class="result-head">
+            <div class="icon-box bg-slate-900" aria-hidden="true"><svg><use href="#i-percent"/></svg></div>
+            <div class="result-meta"><div class="title">Cost Percentage</div><div class="formula">(Cost ÷ Revenue) × 100</div></div>
+          </div>
+          <div id="out-cost-pct" class="result-value text-slate-900" data-out="cost-pct" role="status" aria-live="polite">—</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Gross Profit -->
+  <section id="gross-profit" class="section" aria-labelledby="gross-profit-heading">
+    <div class="section-header border-emerald-500">
+      <h2 id="gross-profit-heading">Gross Profit</h2>
+      <p>Money left after subtracting the cost of goods sold.</p>
+    </div>
+    <div class="grid">
+      <div class="card" role="group" aria-labelledby="gross-profit-heading">
+        <div class="field">
+          <label for="gp-sell">Selling Price</label>
+          <div class="input-wrap"><span class="prefix">AED</span><span class="divider"></span>
+            <input id="gp-sell" name="gp-sell" type="text" inputmode="decimal" placeholder="120,000" data-in="gp-sell" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="gp-cost">Cost</label>
+          <div class="input-wrap"><span class="prefix">AED</span><span class="divider"></span>
+            <input id="gp-cost" name="gp-cost" type="text" inputmode="decimal" placeholder="45,000" data-in="gp-cost" />
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card result-card" aria-live="polite" aria-atomic="true">
+          <div class="result-head">
+            <div class="icon-box bg-emerald-500" aria-hidden="true"><svg><use href="#i-dollar"/></svg></div>
+            <div class="result-meta"><div class="title">Gross Profit</div><div class="formula">Revenue − COGS</div></div>
+          </div>
+          <div id="out-gp-val" class="result-value text-emerald-500" data-out="gp-val" role="status" aria-live="polite">—</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Gross Margin -->
+  <section id="gross-margin" class="section" aria-labelledby="gross-margin-heading">
+    <div class="section-header border-indigo-600">
+      <h2 id="gross-margin-heading">Gross Margin</h2>
+      <p>Profitability ratio — gross profit as a % of revenue.</p>
+    </div>
+    <div class="grid">
+      <div class="card" role="group" aria-labelledby="gross-margin-heading">
+        <div class="field">
+          <label for="gm-sell">Selling Price</label>
+          <div class="input-wrap"><span class="prefix">AED</span><span class="divider"></span>
+            <input id="gm-sell" name="gm-sell" type="text" inputmode="decimal" placeholder="120,000" data-in="gm-sell" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="gm-cost">Cost</label>
+          <div class="input-wrap"><span class="prefix">AED</span><span class="divider"></span>
+            <input id="gm-cost" name="gm-cost" type="text" inputmode="decimal" placeholder="45,000" data-in="gm-cost" />
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card result-card" aria-live="polite" aria-atomic="true">
+          <div class="result-head">
+            <div class="icon-box bg-indigo-600" aria-hidden="true"><svg><use href="#i-trend"/></svg></div>
+            <div class="result-meta"><div class="title">Gross Margin</div><div class="formula">(Gross Profit ÷ Revenue) × 100</div></div>
+          </div>
+          <div id="out-gm-margin" class="result-value text-indigo-600" data-out="gm-margin" role="status" aria-live="polite">—</div>
+        </div>
+        <div class="card result-card" aria-live="polite" aria-atomic="true">
+          <div class="result-head">
+            <div class="icon-box bg-emerald-500" aria-hidden="true"><svg><use href="#i-dollar"/></svg></div>
+            <div class="result-meta"><div class="title">Gross Profit</div><div class="formula">Revenue − COGS</div></div>
+          </div>
+          <div id="out-gm-gp" class="result-value text-emerald-500" data-out="gm-gp" role="status" aria-live="polite">—</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Growth YoY -->
+  <section id="growth-yoy" class="section" aria-labelledby="growth-yoy-heading">
+    <div class="section-header border-orange-500">
+      <h2 id="growth-yoy-heading">Growth Year on Year</h2>
+      <p>How much a metric grew compared to the same period last year.</p>
+    </div>
+    <div class="grid">
+      <div class="card" role="group" aria-labelledby="growth-yoy-heading">
+        <div class="field">
+          <label for="yoy-cur">Current Year Value</label>
+          <div class="input-wrap"><span class="prefix">AED</span><span class="divider"></span>
+            <input id="yoy-cur" name="yoy-cur" type="text" inputmode="decimal" placeholder="150,000" data-in="yoy-cur" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="yoy-prev">Previous Year Value</label>
+          <div class="input-wrap"><span class="prefix">AED</span><span class="divider"></span>
+            <input id="yoy-prev" name="yoy-prev" type="text" inputmode="decimal" placeholder="100,000" data-in="yoy-prev" />
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card result-card" aria-live="polite" aria-atomic="true">
+          <div class="result-head">
+            <div class="icon-box bg-orange-500" aria-hidden="true"><svg><use href="#i-chart"/></svg></div>
+            <div class="result-meta"><div class="title">YoY Growth</div><div class="formula">((Current − Previous) ÷ Previous) × 100</div></div>
+          </div>
+          <div id="out-yoy-val" class="result-value text-orange-500" data-out="yoy-val" role="status" aria-live="polite">—</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer">Results are for informational purposes only.</div>
+</div>
+
+<script>
+  const $ = (sel) => document.querySelector(sel);
+  const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+  // Robust number parser: tolerates commas and spaces (e.g. "120,000" or "120 000")
+  const parseNumber = (raw) => {
+    if (raw == null) return null;
+    const s = String(raw).trim();
+    if (s === "") return null;
+    const cleaned = s.replace(/[, ]+/g, '');
+    const n = Number(cleaned);
+    return Number.isFinite(n) ? n : null;
+  };
+
+  // Format integer part with commas using regex (works with long integers without Number coercion)
+  const formatIntegerWithCommas = (intStr) => {
+    if (!intStr) return '';
+    return intStr.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  };
+
+  // Format an input value with thousands separators while preserving caret position
+  function formatInputWithCaret(el) {
+    const raw = el.value;
+    const caret = el.selectionStart ?? raw.length;
+
+    // Count digits before caret and detect if caret is after decimal
+    const decimalIndex = raw.indexOf('.');
+    const caretIsAfterDecimal = decimalIndex >= 0 && caret > decimalIndex;
+
+    if (caretIsAfterDecimal) {
+      const digitsAfterDecimalBeforeCaret = (raw.slice(decimalIndex + 1, caret).match(/\d/g) || []).length;
+
+      // Normalize: keep digits and dot
+      const cleaned = raw.replace(/[^0-9.]/g, '');
+      const parts = cleaned.split('.');
+      const intPart = parts[0] || '';
+      const decPart = parts.length > 1 ? parts.slice(1).join('.') : null; // keep extra dots collapsed
+
+      const formattedInt = formatIntegerWithCommas(intPart);
+      // Preserve trailing dot if user typed it with no decimals
+      let formatted = formattedInt;
+      if (decPart !== null) {
+        formatted += '.' + decPart;
+      } else if (raw.endsWith('.')) {
+        formatted += '.';
+      }
+
+      // Compute new caret position after decimal
+      const newDecimalIndex = formatted.indexOf('.');
+      let newCaretPos;
+      if (newDecimalIndex >= 0) {
+        newCaretPos = newDecimalIndex + 1 + digitsAfterDecimalBeforeCaret;
+      } else {
+        // no decimal in formatted (rare), put caret at end
+        newCaretPos = formatted.length;
+      }
+
+      el.value = formatted;
+      el.setSelectionRange(newCaretPos, newCaretPos);
+    } else {
+      // Caret in integer part (or no decimal)
+      const digitsBeforeCaret = (raw.slice(0, caret).match(/\d/g) || []).length;
+
+      const cleaned = raw.replace(/[^0-9.]/g, '');
+      const parts = cleaned.split('.');
+      const intPart = parts[0] || '';
+      const decPart = parts.length > 1 ? parts.slice(1).join('.') : null;
+
+      const formattedInt = formatIntegerWithCommas(intPart);
+      const formatted = decPart !== null ? (formattedInt + '.' + decPart) : formattedInt;
+
+      // Map digitsBeforeCaret to new position in formatted
+      let pos = 0, digitsSeen = 0;
+      while (pos < formatted.length && digitsSeen < digitsBeforeCaret) {
+        if (/\d/.test(formatted[pos])) digitsSeen++;
+        pos++;
+      }
+      el.value = formatted;
+      el.setSelectionRange(pos, pos);
+    }
+  }
+
+  const val = (key) => {
+    const el = document.querySelector(`[data-in="${key}"]`);
+    if (!el || el.value === "") return null;
+    return parseNumber(el.value);
+  };
+
+  const fmtNum = (n) => {
+    return Number(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
+  const fmtPct = (n) => `${fmtNum(n)}%`;
+
+  const setOut = (key, text) => {
+    const el = document.querySelector(`[data-out="${key}"]`);
+    if (!el) return;
+    el.textContent = text;
+    if (text === "—") el.classList.remove("filled"); else el.classList.add("filled");
+  };
+
+  function recalc() {
+    // Cost %
+    const ct = val("cost-total"), cs = val("cost-sell");
+    setOut("cost-pct", (ct !== null && cs !== null && cs !== 0) ? fmtPct((ct / cs) * 100) : "—");
+
+    // Gross Profit
+    const gs = val("gp-sell"), gc = val("gp-cost");
+    setOut("gp-val", (gs !== null && gc !== null) ? `AED ${fmtNum(gs - gc)}` : "—");
+
+    // Gross Margin + Gross Profit inside GM
+    const ms = val("gm-sell"), mc = val("gm-cost");
+    setOut("gm-margin", (ms !== null && mc !== null && ms !== 0) ? fmtPct(((ms - mc) / ms) * 100) : "—");
+    setOut("gm-gp", (ms !== null && mc !== null) ? `AED ${fmtNum(ms - mc)}` : "—");
+
+    // YoY
+    const yc = val("yoy-cur"), yp = val("yoy-prev");
+    setOut("yoy-val", (yc !== null && yp !== null && yp !== 0) ? fmtPct(((yc - yp) / yp) * 100) : "—");
+  }
+
+  // Attach formatting + calculation listeners
+  $$("input[data-in]").forEach(el => {
+    // Format live while typing
+    el.addEventListener("input", (e) => {
+      // Save scroll position to avoid layout jumps in some browsers
+      const x = el.scrollLeft;
+      formatInputWithCaret(el);
+      el.scrollLeft = x;
+      recalc();
+    });
+    // Ensure formatting on blur (keeps trailing dot or accidental characters handled)
+    el.addEventListener("blur", () => {
+      // If ends with a dot without decimals, remove trailing dot
+      if (el.value.endsWith('.')) el.value = el.value.slice(0, -1);
+      // Also trim multiple decimals to first one by reformatting
+      formatInputWithCaret(el);
+      recalc();
+    });
+    // Allow pasting and then formatting
+    el.addEventListener("paste", (ev) => {
+      // Let paste happen, then format after a tick
+      setTimeout(() => {
+        formatInputWithCaret(el);
+        recalc();
+      }, 0);
+    });
+  });
+
+  // Pills: smooth scroll + focus management
+  $$(".pill").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const t = document.getElementById(btn.dataset.target);
+      if (t) {
+        t.scrollIntoView({ behavior: "smooth", block: "start" });
+        const heading = t.querySelector("h2, h1");
+        if (heading) heading.focus?.();
+      }
+    });
+  });
+
+  // Make section headings focusable for the skip target
+  $$("section .section-header h2").forEach(h => { h.tabIndex = -1; });
+
+  // Initial formatting pass for placeholders (if desired)
+  $$("input[data-in]").forEach(el => {
+    if (el.value) formatInputWithCaret(el);
+  });
+
+  // Initial calculation
+  recalc();
+</script>
+</body>
+</html>
