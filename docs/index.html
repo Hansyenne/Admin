@@ -65,6 +65,9 @@
   @media (min-width: 768px) { .result-value { font-size: 34px; } }
   .result-value.filled { color: inherit; }
 
+  .small { font-size: 13px; color: #64748b; margin-top: 6px; }
+  .switch { display: inline-flex; align-items: center; gap: 10px; }
+
   .footer { margin-top: 48px; padding-top: 32px; border-top: 1px solid #e2e8f0; text-align: center; color: #94a3b8; font-size: 14px; }
 
   /* Accent colors */
@@ -151,6 +154,9 @@
             <span id="cost-sell-desc" class="sr-only">Enter selling price in AED. Thousands separators will be added automatically.</span>
           </div>
         </div>
+        <div class="field">
+          <label class="switch"><input id="cost-vat" type="checkbox" /> Include 5% VAT on selling price</label>
+        </div>
       </div>
       <div>
         <div class="card result-card" aria-live="polite" aria-atomic="true">
@@ -159,6 +165,7 @@
             <div class="result-meta"><div class="title">Cost Percentage</div><div class="formula">(Cost ÷ Revenue) × 100</div></div>
           </div>
           <div id="out-cost-pct" class="result-value text-slate-900" data-out="cost-pct" role="status" aria-live="polite">—</div>
+          <div id="out-cost-sell-vat" class="small" data-out="cost-sell-vat" aria-live="polite"></div>
         </div>
       </div>
     </div>
@@ -374,9 +381,14 @@
   };
 
   function recalc() {
-    // Cost %
+    // Cost % (with optional 5% VAT on selling price)
     const ct = val("cost-total"), cs = val("cost-sell");
-    setOut("cost-pct", (ct !== null && cs !== null && cs !== 0) ? fmtPct((ct / cs) * 100) : "—");
+    const vatEnabled = document.getElementById('cost-vat')?.checked;
+    const vatRate = vatEnabled ? 0.05 : 0;
+    const csAdjusted = (cs !== null) ? (cs * (1 + vatRate)) : null;
+    setOut("cost-pct", (ct !== null && csAdjusted !== null && csAdjusted !== 0) ? fmtPct((ct / csAdjusted) * 100) : "—");
+    // Show adjusted selling price when VAT is enabled or show empty when not applicable
+    setOut("cost-sell-vat", (csAdjusted !== null && cs !== null) ? `Selling price (incl. VAT): AED ${fmtNum(csAdjusted)}` : "");
 
     // Gross Profit
     const gs = val("gp-sell"), gc = val("gp-cost");
@@ -419,6 +431,10 @@
       }, 0);
     });
   });
+
+  // VAT toggle listener (first tab)
+  const vatCheckbox = document.getElementById('cost-vat');
+  vatCheckbox?.addEventListener('change', recalc);
 
   // Pills: smooth scroll + focus management
   $$(".pill").forEach(btn => {
